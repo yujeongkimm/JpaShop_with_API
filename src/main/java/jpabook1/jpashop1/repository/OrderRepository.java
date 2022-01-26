@@ -26,6 +26,11 @@ public class OrderRepository {
         return em.find(Order.class, id);
     }
 
+    public List<Order> findAll() {
+        return em.createQuery("select o from Order o", Order.class)
+                .getResultList();
+    }
+
     public List<Order> findAllByCriteria(OrderSearch orderSearch) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
@@ -62,11 +67,22 @@ public class OrderRepository {
     //JPA에서 DTO로 바로 반환
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery(
-                "select new jpabook1.jpashop1.repository.OrderSimpleQueryDto(0.id, m.name, " +
-                        "o.orderDate, o.status, d.address)" +
-                        " from Order o" +
-                        " join o.member m" +
-                        " join o.delicery d", OrderSimpleQueryDto.class)
+                        "select new jpabook1.jpashop1.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
+                                " from Order o" +
+                                " join o.member m" +
+                                " join o.delivery d", OrderSimpleQueryDto.class)
+                .getResultList();
+
+    }
+
+    //OrderApiController 패치 조인
+    public List<Order> findAllWithItem() {
+        return em.createQuery(
+                "select distinct o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class)
                 .getResultList();
 
     }

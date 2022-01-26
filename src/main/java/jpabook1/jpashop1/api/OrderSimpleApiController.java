@@ -37,6 +37,7 @@ public class OrderSimpleApiController {
     }
 
     //DTO로 변환
+    @Data
     static class SimpleOrderDto {
         private Long orderId;
         private String name;
