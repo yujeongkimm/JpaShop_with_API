@@ -4,11 +4,14 @@ import jpabook1.jpashop1.domain.Address;
 import jpabook1.jpashop1.domain.Order;
 import jpabook1.jpashop1.domain.OrderItem;
 import jpabook1.jpashop1.domain.OrderStatus;
+import jpabook1.jpashop1.repository.JPA_return_DTO.OrderQueryDto;
+import jpabook1.jpashop1.repository.JPA_return_DTO.OrderQueryRepository;
 import jpabook1.jpashop1.repository.OrderRepository;
 import jpabook1.jpashop1.repository.OrderSearch;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
+
 
     @GetMapping("/api/v2/orders")
     public List<OrderDto> ordersV2() {
@@ -65,10 +70,27 @@ public class OrderApiController {
         }
     }
 
+    //일대다 패치 조인
     @GetMapping("/api/v3/orders")
     public List<OrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithItem();
         List<OrderDto> result = orders.stream().map(o -> new OrderDto(o)).collect(Collectors.toList());
         return result;
+    }
+
+    //일대다 페이징 처리
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(@RequestParam(value = "offset") int offset,
+                                        @RequestParam(value = "limit") int limit) {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
+        List<OrderDto> result = orders.stream().map(o -> new OrderDto(o)).collect(Collectors.toList());
+
+        return result;
+    }
+
+    //JPA에서 DTO로 반환
+    @GetMapping("/api/v4/orders")
+    public List<OrderQueryDto> ordersV4() {
+    return orderQueryRepository.findOrderQueryDtos();
     }
 }
